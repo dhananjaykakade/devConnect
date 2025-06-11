@@ -8,7 +8,7 @@ const prisma = new PrismaClient()
 type JwtPayload = { id: string; role: string }
 
 export const createTokens = async (payload: JwtPayload) => {
-  const accessToken = jwt.sign(payload, config.jwtSecret, { expiresIn: '15m' })
+  const accessToken = jwt.sign(payload, config.jwtSecret, { expiresIn: '1d' })
   const refreshToken = jwt.sign(payload, config.refreshSecret, { expiresIn: '7d' })
 
   // Persist refresh token (hashed storage is even safer; keeping simple here)

@@ -4,11 +4,10 @@ import helmet from 'helmet'
 import compression from 'compression'
 import cookieParser from 'cookie-parser'
 import morgan from 'morgan'
-import { ApiError } from './utils/ApiError'
-import ResponseHandler from './utils/ApiResponse'
 import { NotFoundHandler, ErrorHandler } from './middlewares/error.middleware'
 // import routes from './routes' (you can add this later)
 import authRoutes from './module/auth/auth.routes'
+import postRoutes from './module/post/post.routes'
 
 const app: Application = express()
 
@@ -31,6 +30,7 @@ app.use(morgan('dev'))
 // 📦 Routes
 
 app.use('/api/auth', authRoutes)
+app.use('/api/posts', postRoutes)
 
 // 🧩 API Error Handling
 

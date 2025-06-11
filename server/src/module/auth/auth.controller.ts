@@ -2,11 +2,11 @@ import { Request, Response, RequestHandler } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import ResponseHandler from '../../utils/ApiResponse';
-import { registerSchema,loginSchema } from './auth.validation';
-import { config } from '../../config/config.service';
+import { registerSchema,loginSchema,updateProfileSchema } from './auth.validation';
 import prisma from '../../helper/prisma.helper';
 import {  verifyRefreshToken,
   createTokens,} from './auth.utils';
+  import {AuthenticatedRequest } from '../../middlewares/auth.middleware';
 
 export const register: RequestHandler = async (req: Request, res: Response) => {
   try {
@@ -75,7 +75,6 @@ const { accessToken, refreshToken } = await createTokens({
     return;
   }
 };
-
 
 
 export const refreshToken:RequestHandler = async (req: Request, res: Response) => {
@@ -164,3 +163,117 @@ export const login:RequestHandler = async (req: Request, res: Response) => {
     return 
   }
 }
+
+export const updateProfile:RequestHandler = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const userId = req.user?.id // 👈 from JWT middleware
+
+    const parsed = updateProfileSchema.safeParse(req.body)
+    if (!parsed.success) {
+        ResponseHandler.validationError(res, 'Invalid input', parsed.error.format())
+      return 
+    }
+
+    const { username, bio, avatar,techStack } = parsed.data
+
+// Check if username already exists
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        id: { not: userId }, // Exclude current user
+        username,
+      },
+    })
+    if (existingUser) {
+        ResponseHandler.conflict(res, 'Username already taken')
+      return 
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        username,
+        bio,
+        avatar,
+        techStack: techStack || [],
+      },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        bio: true,
+        avatar: true,
+        techStack: true,
+      },
+    })
+
+    ResponseHandler.success(res, 200, 'Profile updated successfully', updatedUser)
+    return 
+  } catch (error) {
+      ResponseHandler.handleError(error, res)
+    return 
+  }
+}
+
+//create get profile endpoint
+export const getProfile: RequestHandler = async (req: AuthenticatedRequest, res: Response) => {
+    try {
+        const userId = req.user?.id; // 👈 from JWT middleware
+    
+        if (!userId) {
+        ResponseHandler.unauthorized(res, 'User not authenticated');
+        return;
+        }
+    
+        const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+            id: true,
+            username: true,
+            email: true,
+            bio: true,
+            avatar: true,
+            techStack: true,
+        },
+        });
+    
+        if (!user) {
+        ResponseHandler.notFound(res, 'User not found');
+        return;
+        }
+    
+        ResponseHandler.success(res, 200, 'Profile retrieved successfully', user);
+        return;
+    } catch (error) {
+        ResponseHandler.handleError(error, res);
+        return;
+    }
+    }
+
+//create logout endpoint
+export const logout: RequestHandler = async (req: AuthenticatedRequest, res: Response) => {
+    try {
+        const userId = req.user?.id; // 👈 from JWT middleware
+    
+        if (!userId) {
+        ResponseHandler.unauthorized(res, 'User not authenticated');
+        return;
+        }
+    
+        // Delete all refresh tokens for the user
+        await prisma.refreshToken.deleteMany({
+        where: { userId },
+        });
+
+          res.clearCookie('refreshToken', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+  });
+    
+        ResponseHandler.success(res, 200, 'Logged out successfully');
+        return;
+    } catch (error) {
+        ResponseHandler.handleError(error, res);
+        return;
+    }
+    }
