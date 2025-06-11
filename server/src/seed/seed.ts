@@ -5,6 +5,10 @@ import { faker } from '@faker-js/faker'
 const prisma = new PrismaClient()
 
 async function main() {
+
+
+
+
   // Create users
   const users = await Promise.all(
     Array.from({ length: 10 }).map(async () => {
@@ -32,6 +36,7 @@ async function main() {
         data: {
           content: faker.lorem.paragraph(),
           techTags: faker.helpers.arrayElements(['React', 'Node.js', 'TS', 'MongoDB'], 2),
+          media: faker.image.url(),
           authorId: author.id,
         }
       })
@@ -89,6 +94,7 @@ async function main() {
 
   console.log('✅ Seed data created successfully.')
 }
+
 
 main()
   .catch((e) => {
