@@ -10,6 +10,7 @@ const schema = z.object({
   DATABASE_URL: z.string().url(),
   JWT_SECRET: z.string().min(10),
   REDIS_URL: z.string().url().optional(),
+  REFRESH_SECRET: z.string().min(10).optional(),
 })
 
 type EnvVars = z.infer<typeof schema>
@@ -49,6 +50,10 @@ export class ConfigService {
   get redisUrl(): string | undefined {
     return this.env.REDIS_URL
   }
+  get refreshSecret(): string {
+    return this.env.REFRESH_SECRET || this.env.JWT_SECRET
+  }
+
 
   // Add more computed properties or methods if needed
 }

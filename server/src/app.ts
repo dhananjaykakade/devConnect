@@ -8,6 +8,7 @@ import { ApiError } from './utils/ApiError'
 import ResponseHandler from './utils/ApiResponse'
 import { NotFoundHandler, ErrorHandler } from './middlewares/error.middleware'
 // import routes from './routes' (you can add this later)
+import authRoutes from './module/auth/auth.routes'
 
 const app: Application = express()
 
@@ -28,15 +29,8 @@ app.use(cookieParser())
 app.use(morgan('dev'))
 // app.use(pinoHttp({ logger }))
 // 📦 Routes
-// app.use('/api/v1', routes)
-// creating default route for testing
-app.get('/', (req, res) => {
-    ResponseHandler.success(res, 200, 'Welcome to the API', { version: '1.0.0' })
-    })
 
-app.get('/error', (req, res) => {
-    throw new ApiError(500, 'This is a test error')
-    })
+app.use('/api/auth', authRoutes)
 
 // 🧩 API Error Handling
 
