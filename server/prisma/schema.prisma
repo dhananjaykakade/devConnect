@@ -21,19 +21,30 @@ model RefreshToken {
 model User {
   id            String         @id @default(auto()) @map("_id") @db.ObjectId
   username      String         @unique
+  name          String
   email         String         @unique
   password      String
   bio           String?
   avatar        String?
   techStack     String[]
-  followers     String[]       @db.ObjectId
-  following     String[]       @db.ObjectId
+  followers     Follow[]       @relation("UserFollowers") // Users who follow this user
+  following     Follow[]       @relation("UserFollowing") // Users this user follows
   posts         Post[]
   comments      Comment[]
   role          Role           @default(USER)
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   refreshTokens RefreshToken[] @relation("UserTokens")
+}
+
+model Follow {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  followerId  String @db.ObjectId
+  followingId String @db.ObjectId
+
+  follower  User     @relation("UserFollowing", fields: [followerId], references: [id])
+  following User     @relation("UserFollowers", fields: [followingId], references: [id])
+  createdAt DateTime @default(now())
 }
 
 model Post {
@@ -48,6 +59,8 @@ model Post {
   flagged   Boolean   @default(false)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+
+  @@index([createdAt])
 }
 
 model Comment {

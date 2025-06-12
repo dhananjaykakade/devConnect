@@ -6,7 +6,16 @@ const prisma = new PrismaClient()
 
 async function main() {
 
+//clean the database
 
+  console.log('🧹 Cleaning the database...'
+  )
+  await prisma.notification.deleteMany({})
+  await prisma.report.deleteMany({})
+  await prisma.comment.deleteMany({})
+  await prisma.post.deleteMany({})
+  await prisma.refreshToken.deleteMany({})
+  await prisma.user.deleteMany({})
 
 
   // Create users
@@ -16,6 +25,7 @@ async function main() {
         data: {
           username: faker.internet.userName(),
           email: faker.internet.email(),
+          name: faker.name.fullName(),
           password: faker.internet.password(),
           bio: faker.lorem.sentence(),
           avatar: faker.image.avatar(),

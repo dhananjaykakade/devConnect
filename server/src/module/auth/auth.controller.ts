@@ -7,6 +7,7 @@ import prisma from '../../helper/prisma.helper';
 import {  verifyRefreshToken,
   createTokens,} from './auth.utils';
   import {AuthenticatedRequest } from '../../middlewares/auth.middleware';
+  import { redis } from '../../utils/redis';
 
 export const register: RequestHandler = async (req: Request, res: Response) => {
   try {
@@ -27,7 +28,7 @@ export const register: RequestHandler = async (req: Request, res: Response) => {
       return;
     }
 
-    const { username, email, password } = parsed.data;
+    const { username, email, password,name } = parsed.data;
 
     // Check if user already exists
     const existingUser = await prisma.user.findFirst({
@@ -49,6 +50,7 @@ export const register: RequestHandler = async (req: Request, res: Response) => {
       data: {
         username,
         email,
+        name,
         password: hashedPassword,
       },
     });
@@ -174,7 +176,7 @@ export const updateProfile:RequestHandler = async (req: AuthenticatedRequest, re
       return 
     }
 
-    const { username, bio, avatar,techStack } = parsed.data
+    const { username, bio, avatar,techStack,name } = parsed.data
 
 // Check if username already exists
     const existingUser = await prisma.user.findFirst({
@@ -192,6 +194,7 @@ export const updateProfile:RequestHandler = async (req: AuthenticatedRequest, re
       where: { id: userId },
       data: {
         username,
+        name,
         bio,
         avatar,
         techStack: techStack || [],
@@ -199,12 +202,15 @@ export const updateProfile:RequestHandler = async (req: AuthenticatedRequest, re
       select: {
         id: true,
         username: true,
+        name: true,
         email: true,
         bio: true,
         avatar: true,
         techStack: true,
       },
     })
+        const cacheKey = `user:profile:${userId}`;
+    await redis.del(cacheKey);
 
     ResponseHandler.success(res, 200, 'Profile updated successfully', updatedUser)
     return 
@@ -223,6 +229,13 @@ export const getProfile: RequestHandler = async (req: AuthenticatedRequest, res:
         ResponseHandler.unauthorized(res, 'User not authenticated');
         return;
         }
+           const cacheKey = `user:profile:${userId}`;
+    const cachedProfile = await redis.get(cacheKey);
+
+    if (cachedProfile) {
+      ResponseHandler.success(res, 200, 'Profile retrieved successfully (from cache)', cachedProfile);
+      return 
+    }
     
         const user = await prisma.user.findUnique({
         where: { id: userId },
@@ -240,7 +253,7 @@ export const getProfile: RequestHandler = async (req: AuthenticatedRequest, res:
         ResponseHandler.notFound(res, 'User not found');
         return;
         }
-    
+     await redis.set(cacheKey, JSON.stringify(user), { ex: 300 });
         ResponseHandler.success(res, 200, 'Profile retrieved successfully', user);
         return;
     } catch (error) {
@@ -277,3 +290,5 @@ export const logout: RequestHandler = async (req: AuthenticatedRequest, res: Res
         return;
     }
     }
+
+

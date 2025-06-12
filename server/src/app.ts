@@ -8,6 +8,8 @@ import { NotFoundHandler, ErrorHandler } from './middlewares/error.middleware'
 // import routes from './routes' (you can add this later)
 import authRoutes from './module/auth/auth.routes'
 import postRoutes from './module/post/post.routes'
+import userRoutes from './module/user/user.route'
+
 
 const app: Application = express()
 
@@ -31,8 +33,10 @@ app.use(morgan('dev'))
 
 app.use('/api/auth', authRoutes)
 app.use('/api/posts', postRoutes)
+app.use('/api/users', userRoutes)
 
 // 🧩 API Error Handling
+
 
 
 // 🧹 404 Handler
