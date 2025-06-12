@@ -60,11 +60,16 @@ await redis.set(cacheKey, JSON.stringify(users), { ex: 60 });
 export const followUser: RequestHandler = async (req: AuthenticatedRequest, res) => {
   try {
     const followerId = req.user?.id;
-    const followingId = req.params.userId;
-
-    if (!followerId || !followingId) {
-       ResponseHandler.validationError(res, 'User ID is missing.');
+    if (!followerId) {
+       ResponseHandler.unauthorized(res, 'User not authenticated');
+       return
     }
+    const followingId = req.params.userId;
+    if (!followingId) {
+       ResponseHandler.validationError(res, 'User ID is missing.');
+       return
+    }
+
 
     if (followerId === followingId) {
        ResponseHandler.validationError(res, 'You cannot follow yourself.');
@@ -118,6 +123,7 @@ export const unfollowUser: RequestHandler = async (req: AuthenticatedRequest, re
 
     if (!followEntry) {
      ResponseHandler.validationError(res, 'You are not following this user.');
+     return
     }
 
     await prisma.follow.delete({

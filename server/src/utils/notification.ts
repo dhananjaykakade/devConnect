@@ -10,7 +10,7 @@ export const sendNotification = async ({
 }: {
   receiverId: string;
   senderId?: string;
-  type: "FOLLOW" | "LIKE" | "COMMENT" | "TEST" | "SYSTEM";
+  type: "FOLLOW" | "LIKE" | "COMMENT" | "SYSTEM" | "TEST";
   message: string;
   link?: string;
 }) => {
