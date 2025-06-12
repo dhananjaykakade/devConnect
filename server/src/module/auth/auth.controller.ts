@@ -59,6 +59,8 @@ export const register: RequestHandler = async (req: Request, res: Response) => {
 const { accessToken, refreshToken } = await createTokens({
   id: newUser.id,
   role: newUser.role,
+  name: newUser.name ,
+  username: newUser.username 
 })
 
     // Success response
@@ -104,6 +106,8 @@ export const refreshToken:RequestHandler = async (req: Request, res: Response) =
     const { accessToken, refreshToken: newRefresh } = await createTokens({
       id: payload.id,
       role: payload.role,
+      name: payload.name,
+      username: payload.username
     })
 
     ResponseHandler.success(res, 200, 'Token refreshed', {
@@ -146,6 +150,8 @@ export const login:RequestHandler = async (req: Request, res: Response) => {
     const { accessToken, refreshToken } = await createTokens({
       id: user.id,
       role: user.role,
+      name: user.name ,
+      username: user.username
     })
 
     // 5️⃣ Send response

@@ -5,7 +5,7 @@ import { addDays } from 'date-fns'
 
 const prisma = new PrismaClient()
 
-type JwtPayload = { id: string; role: string }
+type JwtPayload = { id: string; role: string ; name: string; username: string }
 
 export const createTokens = async (payload: JwtPayload) => {
   const accessToken = jwt.sign(payload, config.jwtSecret, { expiresIn: '1d' })

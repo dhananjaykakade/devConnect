@@ -35,6 +35,8 @@ model User {
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   refreshTokens RefreshToken[] @relation("UserTokens")
+    receivedNotifications Notification[] @relation("UserReceivedNotifications")
+  sentNotifications     Notification[] @relation("UserSentNotifications")
 }
 
 model Follow {
@@ -84,12 +86,22 @@ model Report {
 model Notification {
   id         String           @id @default(auto()) @map("_id") @db.ObjectId
   receiverId String           @db.ObjectId
+  senderId   String?          @db.ObjectId        // optional sender (null for system notifications)
+
   type       NotificationType
   message    String
-  link       String?
+  link       String?                               // e.g., /post/xyz or /user/abc
   isRead     Boolean          @default(false)
   createdAt  DateTime         @default(now())
+
+  // Relations
+  receiver   User             @relation("UserReceivedNotifications", fields: [receiverId], references: [id])
+  sender     User?            @relation("UserSentNotifications", fields: [senderId], references: [id])
+
+  @@index([receiverId, isRead])                    // optimize unread fetch
+  @@index([type])                                  // optional: filter by notification type
 }
+
 
 enum Role {
   USER
@@ -100,5 +112,6 @@ enum NotificationType {
   FOLLOW
   LIKE
   COMMENT
-  MENTION
+  SYSTEM
+  TEST
 }

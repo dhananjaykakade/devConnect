@@ -8,6 +8,7 @@ import {
 } from "./post.validation";
 import { AuthenticatedRequest } from "../../middlewares/auth.middleware";
 import { redis } from "../../utils/redis";
+import { sendNotification } from "../../utils/notification";
 
 export const createPost: RequestHandler = async (
   req: AuthenticatedRequest,
@@ -278,6 +279,17 @@ export const toggleLikePost: RequestHandler = async (
     });
 
     const message = hasLiked ? "Post unliked" : "Post liked";
+
+    //if someone likes the post trigger notification
+    if (!hasLiked) {
+      await sendNotification({
+        receiverId: post.authorId,
+        senderId: userId,
+        type: "LIKE",
+        message: `${req.user?.name} liked your post`,
+        link: `/posts/${postId}`,
+      });
+    }
 
     ResponseHandler.success(res, 200, message, {
       likesCount: updatedPost.likes.length,

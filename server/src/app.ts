@@ -9,6 +9,7 @@ import { NotFoundHandler, ErrorHandler } from './middlewares/error.middleware'
 import authRoutes from './module/auth/auth.routes'
 import postRoutes from './module/post/post.routes'
 import userRoutes from './module/user/user.route'
+import notificationRoute from './module/notification/notification.route'
 
 
 const app: Application = express()
@@ -34,6 +35,7 @@ app.use(morgan('dev'))
 app.use('/api/auth', authRoutes)
 app.use('/api/posts', postRoutes)
 app.use('/api/users', userRoutes)
+app.use('/api/notifications', notificationRoute)
 
 // 🧩 API Error Handling
 

@@ -6,6 +6,8 @@ import ResponseHandler from '../utils/ApiResponse';
 interface DecodedToken {
   id: string;
   role: string;
+  name: string;
+  username: string;
   iat: number;
   exp: number;
 }
@@ -14,6 +16,8 @@ export interface AuthenticatedRequest extends Request {
   user?: {
     id: string;
     role: string;
+    name: string;
+    username: string;
   };
 }
 
@@ -38,6 +42,8 @@ export const authenticate = (
     req.user = {
       id: decoded.id,
       role: decoded.role,
+      name: decoded.name, 
+      username: decoded.username 
     };
 
     next();

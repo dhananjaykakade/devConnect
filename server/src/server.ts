@@ -2,11 +2,13 @@ import http from 'http'
 import app from './app'
 import { config } from './config/config.service'
 import logger from './utils/logger'
+import {setupWebSocket } from './websocket/index'
 
 const server = http.createServer(app)
 const PORT = config.port
 
 // Start server
+setupWebSocket(server)
 server.listen(PORT, () => {
   logger.info(`Server running on http://localhost:${PORT}`)
 })
