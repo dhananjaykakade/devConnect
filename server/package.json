@@ -12,8 +12,8 @@
     "prisma:push": "prisma db push",
     "prisma:studio": "prisma studio",
     "prisma:format": "prisma format",
-    "test:changed": "jest --onlyChanged",
-  "test:latest": "git diff --name-only --diff-filter=ACMRT HEAD~1 | grep '\\.test\\.ts$' | xargs pnpm exec jest"
+   "test:changed": "cross-env NODE_ENV=test jest --onlyChanged",
+  "test:latest": "cross-env NODE_ENV=test git diff --name-only --diff-filter=ACMRT HEAD~1 | grep '\\.test\\.ts$' | xargs pnpm exec jest"
   },
   "keywords": [],
   "author": "",
@@ -52,6 +52,7 @@
     "@types/node": "^24.0.0",
     "@types/supertest": "^6.0.3",
     "@types/ws": "^8.18.1",
+    "cross-env": "^7.0.3",
     "jest": "^30.0.0",
     "supertest": "^7.1.1",
     "ts-jest": "^29.4.0",

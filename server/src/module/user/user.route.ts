@@ -4,7 +4,7 @@ import { searchUsers,followUser,unfollowUser,getFollowers,getFollowing,checkIfFo
 
 const router = Router()
 // Route to search users by username
-router.get('/search', authenticate, searchUsers)
+router.get('/search', searchUsers)
 router.post('/:userId/follow', authenticate, followUser)
 router.post('/:userId/unfollow', authenticate, unfollowUser)
 router.get('/:userId/followers', getFollowers);

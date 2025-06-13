@@ -15,14 +15,9 @@ describe('Auth Routes', () => {
 
   afterAll(async () => {
     // Cleanup test use
-    const user = await prisma.user.findUnique({
-      where: { email: testUser.email }
-    });
-    if (user) {
-      await prisma.refreshToken.deleteMany({ where: { userId: user.id } });
-    }
 
-    await prisma.user.deleteMany({ where: { email: testUser.email } });
+      await prisma.refreshToken.deleteMany();
+    await prisma.user.deleteMany();
     await prisma.$disconnect();
   });
 
