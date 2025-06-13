@@ -38,6 +38,16 @@ afterAll(async () => {
 
 
 describe('Post Extras - Flag, Report, Feed', () => {
+
+      it('should fetch all posts in feed', async () => {
+    const res = await request(app)
+      .get('/api/posts/all')
+      .set('Authorization', `Bearer ${token}`);
+    expect(res.status).toBe(200);
+    console.log(res.body.data.posts);
+    expect(res.body.data.posts.length).toBeGreaterThan(0);
+  });
+  
   it('should flag the post', async () => {
     const res = await request(app)
       .patch(`/api/posts/${postId}/flag`)
@@ -47,13 +57,7 @@ describe('Post Extras - Flag, Report, Feed', () => {
     expect(res.body.message).toBe('Post flagged successfully');
   });
 
-  it('should fetch all posts in feed', async () => {
-    const res = await request(app)
-      .get('/api/posts/all')
-      .set('Authorization', `Bearer ${token}`);
-    expect(res.status).toBe(200);
-    expect(res.body.data.posts.length).toBeGreaterThan(0);
-  });
+
 
   it('should fetch single post by ID', async () => {
     const res = await request(app)
