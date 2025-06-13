@@ -17,11 +17,17 @@ export const createPost: RequestHandler = async (
   try {
     const parsed = createPostSchema.safeParse(req.body);
     if (!parsed.success) {
-      ResponseHandler.validationError(
-        res,
-        "Invalid input",
-        parsed.error.format()
-      );
+      const formattedErrors = parsed.error.format();
+      const flatErrors = Object.entries(formattedErrors)
+        .filter(([key]) => key !== "_errors")
+        .reduce((acc, [key, val]) => {
+          acc[key] = !val || Array.isArray(val)
+            ? 'Invalid'
+            : val._errors?.[0] || 'Invalid';
+          return acc;
+        }, {} as Record<string, string>);
+
+      ResponseHandler.validationError(res, 'Invalid input', flatErrors);
       return;
     }
 
@@ -278,7 +284,7 @@ export const toggleLikePost: RequestHandler = async (
       },
     });
 
-    const message = hasLiked ? "Post unliked" : "Post liked";
+    const message = hasLiked ? "Post unliked successfully" : "Post liked successfully";
 
     //if someone likes the post trigger notification
     if (!hasLiked) {

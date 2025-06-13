@@ -16,8 +16,8 @@ describe('Auth Routes', () => {
   afterAll(async () => {
     // Cleanup test use
 
-      await prisma.refreshToken.deleteMany();
-    await prisma.user.deleteMany();
+      await prisma.refreshToken.deleteMany({});
+    await prisma.user.deleteMany({});
     await prisma.$disconnect();
   });
 
