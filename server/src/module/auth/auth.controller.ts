@@ -1,6 +1,6 @@
 import { Request, Response, RequestHandler } from 'express';
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+
 import ResponseHandler from '../../utils/ApiResponse';
 import { registerSchema,loginSchema,updateProfileSchema } from './auth.validation';
 import prisma from '../../helper/prisma.helper';
@@ -9,7 +9,39 @@ import {  verifyRefreshToken,
   import {AuthenticatedRequest } from '../../middlewares/auth.middleware';
   import { redis } from '../../utils/redis';
 
-export const register: RequestHandler = async (req: Request, res: Response) => {
+/**
+ * @swagger
+ * /api/auth/register:
+ *   post:
+ *     summary: Register a new user
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - username
+ *               - email
+ *               - password
+ *               - name
+ *             properties:
+ *               username:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *               name:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: User registered successfully
+ *       409:
+ *         description: User already exists
+ */
+  export const register: RequestHandler = async (req: Request, res: Response) => {
   try {
     // Validate input with Zod schema
     const parsed = registerSchema.safeParse(req.body);
@@ -120,7 +152,32 @@ export const refreshToken:RequestHandler = async (req: Request, res: Response) =
     return 
   }
 }
-
+/**
+ * @swagger
+ * /api/auth/login:
+ *   post:
+ *     summary: Login user
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [email, password]
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: johndoe@example.com
+ *               password:
+ *                 type: string
+ *                 example: Test@1234
+ *     responses:
+ *       200:
+ *         description: Login successful
+ *       401:
+ *         description: Invalid credentials
+ */
 export const login:RequestHandler = async (req: Request, res: Response) => {
   try {
     // 1️⃣ Validate body

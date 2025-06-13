@@ -1,4 +1,4 @@
-import express, { Application,Request,Response } from 'express'
+import express, { Express, Request, Response } from 'express'
 import cors from 'cors'
 import helmet from 'helmet'
 import compression from 'compression'
@@ -11,9 +11,10 @@ import authRoutes from './module/auth/auth.routes'
 import postRoutes from './module/post/post.routes'
 import userRoutes from './module/user/user.route'
 import notificationRoute from './module/notification/notification.route'
+import { setupSwagger } from './docs/swagger';
 
 
-const app: Application = express()
+const app: Express = express()
 
 // 🔐 Security and performance
 app.use(helmet())
@@ -40,7 +41,7 @@ app.get('/api/health', (req: Request, res: Response) => {
     timestamp: new Date().toISOString(),
   });
 });
-
+setupSwagger(app);
 app.use('/api/auth',rateLimit({ windowMs: 15 * 60 * 1000, max: 10 }), authRoutes)
 app.use('/api/posts', postRoutes)
 app.use('/api/users', userRoutes)
@@ -55,5 +56,6 @@ app.use(NotFoundHandler)
 
 // 🔥 Global Error Handler
 app.use(ErrorHandler)
+
 
 export default app
