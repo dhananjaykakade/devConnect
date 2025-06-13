@@ -61,7 +61,7 @@ export const getAllPosts: RequestHandler = async (
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
     const skip = (page - 1) * limit;
-    const username = req.query.username as string;
+    const username = req.query.username as string || "";
 
     const techTag = req.query.techTag as string;
     const search = req.query.search as string;
