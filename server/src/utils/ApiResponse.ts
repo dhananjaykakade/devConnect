@@ -1,3 +1,4 @@
+import { refreshToken } from './../module/auth/auth.controller';
 import { Response } from 'express'
 import { messages } from '../constants/messages'
 
@@ -143,6 +144,33 @@ class ResponseHandler {
       statusCode,
       message,
       errors,
+    })
+  }
+
+  // create new method for sending access token in cookie with proper response with user object 
+  static sendAccessToken(
+    res: Response,
+    user: any,
+    accessToken: string,
+    refreshToken: string,
+    statusCode = 200,
+    message = messages.success.LOGGED_IN
+  ) { 
+    res.cookie('accessToken', accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 24 * 60 * 60 * 1000, // 1 day
+    })
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    })
+    return res.status(statusCode).json({
+      success: true,
+      statusCode,
+      message,
+      data: { user },
     })
   }
 }

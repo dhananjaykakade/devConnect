@@ -21,10 +21,20 @@ beforeAll(async () => {
     name: 'Test Action User',
 
   });
-  if(res.status !== 201) {
-    console.error('Error creating test user:', res.error);
-  }
-  token = res.body.data.accessToken;
+  
+    const setCookies = res.headers['set-cookie'];
+    expect(setCookies).toEqual(
+      expect.arrayContaining([
+        expect.stringMatching(/^accessToken=.*HttpOnly/),
+        expect.stringMatching(/^refreshToken=.*HttpOnly/),
+      ])
+    );
+
+    const cookiesArray = Array.isArray(setCookies) ? setCookies : [setCookies];
+    token = cookiesArray.find((c) => c.startsWith('accessToken='));
+    console.log('Auth Token:', token);
+    token = token ? token.split(';')[0].split('=')[1] : '';
+
 
   // Create a post for testing
   const postRes = await request(app)

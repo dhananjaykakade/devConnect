@@ -11,7 +11,7 @@ import authRoutes from './module/auth/auth.routes'
 import postRoutes from './module/post/post.routes'
 import userRoutes from './module/user/user.route'
 import notificationRoute from './module/notification/notification.route'
-import { setupSwagger } from './docs/swagger';
+
 
 
 const app: Express = express()
@@ -19,8 +19,16 @@ const app: Express = express()
 // 🔐 Security and performance
 app.use(helmet())
 app.use(cors({
-  origin: true,
-  credentials: true
+
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  exposedHeaders: ['Content-Length', 'X-Total-Count'],
+  preflightContinue: false,
+  optionsSuccessStatus: 204,
+  maxAge: 86400, // 24 hours
+  // You can also specify allowed origins if needed
+  origin: ['http://localhost:5173', 'https://yourdomain.com'],
 }))
 app.use(compression())
 
@@ -41,7 +49,7 @@ app.get('/api/health', (req: Request, res: Response) => {
     timestamp: new Date().toISOString(),
   });
 });
-setupSwagger(app);
+
 app.use('/api/auth',rateLimit({ windowMs: 15 * 60 * 1000, max: 10 }), authRoutes)
 app.use('/api/posts', postRoutes)
 app.use('/api/users', userRoutes)

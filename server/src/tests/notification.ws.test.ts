@@ -29,9 +29,20 @@ beforeAll(async () => {
     password: 'Test@1234',
     name: 'Notify User',
   });
-
-  token = res.body.data.accessToken;
+  // set userId for later use
   userId = res.body.data.user.id;
+    const setCookies = res.headers['set-cookie'];
+    expect(setCookies).toEqual(
+      expect.arrayContaining([
+        expect.stringMatching(/^accessToken=.*HttpOnly/),
+        expect.stringMatching(/^refreshToken=.*HttpOnly/),
+      ])
+    );
+
+    const cookiesArray = Array.isArray(setCookies) ? setCookies : [setCookies];
+    token = cookiesArray.find((c) => c.startsWith('accessToken='));
+    console.log('Auth Token:', token);
+    token = token ? token.split(';')[0].split('=')[1] : '';
 });
 
 afterAll(async () => {

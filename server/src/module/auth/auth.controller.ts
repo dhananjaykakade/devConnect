@@ -96,15 +96,7 @@ const { accessToken, refreshToken } = await createTokens({
 })
 
     // Success response
-    ResponseHandler.success(res, 201, 'User registered successfully', {
-      user: {
-        id: newUser.id,
-        username: newUser.username,
-        email: newUser.email,
-      },
-   accessToken,
-  refreshToken,
-    });
+    ResponseHandler.sendAccessToken(res, newUser, accessToken, refreshToken )
     return;
   } catch (error) {
     ResponseHandler.handleError(error, res);
@@ -142,10 +134,7 @@ export const refreshToken:RequestHandler = async (req: Request, res: Response) =
       username: payload.username
     })
 
-    ResponseHandler.success(res, 200, 'Token refreshed', {
-        accessToken,
-        refreshToken: newRefresh,
-    })
+    ResponseHandler.sendAccessToken(res, payload, accessToken, newRefresh)
     return 
   } catch (err) {
       ResponseHandler.unauthorized(res, 'Refresh token invalid')
@@ -212,16 +201,7 @@ export const login:RequestHandler = async (req: Request, res: Response) => {
     })
 
     // 5️⃣ Send response
-    ResponseHandler.success(res, 200, 'Login successful', {
-        user: {
-            id: user.id,
-            username: user.username,
-            email: user.email,
-            role: user.role,
-        },
-        accessToken,
-        refreshToken,
-    })
+    ResponseHandler.sendAccessToken(res, user, accessToken, refreshToken)
     return 
   } catch (error) {
       ResponseHandler.handleError(error, res)

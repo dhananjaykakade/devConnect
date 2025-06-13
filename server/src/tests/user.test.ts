@@ -33,7 +33,19 @@ beforeAll(async () => {
     email: testUser.email,
     password: testUser.password,
   });
-  userToken = res.body.data.accessToken;
+  userId = res.body.data.user.id;
+    const setCookies = res.headers['set-cookie'];
+    expect(setCookies).toEqual(
+      expect.arrayContaining([
+        expect.stringMatching(/^accessToken=.*HttpOnly/),
+        expect.stringMatching(/^refreshToken=.*HttpOnly/),
+      ])
+    );
+
+    const cookiesArray = Array.isArray(setCookies) ? setCookies : [setCookies];
+    userToken = cookiesArray.find((c) => c.startsWith('accessToken='));
+    console.log('Auth Token:', userToken);
+    userToken = userToken ? userToken.split(';')[0].split('=')[1] : '';
 
   const user = await prisma.user.findUnique({ where: { email: testUser.email } });
   const otherUser = await prisma.user.findUnique({ where: { email: testOtherUser.email } });
