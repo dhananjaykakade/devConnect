@@ -33,7 +33,7 @@ beforeAll(async () => {
     .send({
       content: 'Post for like/comment test',
       techTags: ['node', 'express'],
-      media: 'https://chatgpt.com/c/684930b5-52e0-8002-a9b8-460345e0af97asdf.com/image.jpg',
+      media: 'https://test.com/image.jpg',
     });
 
 if (postRes.status !== 201) {
