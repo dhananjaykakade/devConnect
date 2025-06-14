@@ -20,7 +20,31 @@ export interface AuthenticatedRequest extends Request {
     username: string;
   };
 }
+export const getTokenFromRequest = (req: Request): string | null => {
+  if (req.cookies?.accessToken) {
+    return req.cookies.accessToken;
+  }
 
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    return authHeader.split(' ')[1];
+  }
+
+  return null;
+};
+
+export const getRefreshTokenFromRequest = (req: Request): string | null => {
+  if (req.cookies?.refreshToken) {
+    return req.cookies.refreshToken;
+  }
+
+  const refreshHeader = req.headers['x-refresh-token'];
+  if (typeof refreshHeader === 'string' && refreshHeader.trim() !== '') {
+    return refreshHeader;
+  }
+
+  return null;
+}
 
 export const authenticate = (
   req: AuthenticatedRequest,
@@ -28,14 +52,13 @@ export const authenticate = (
   next: NextFunction
 ):void  => {
   try {
-    const authHeader = req.headers.authorization;
 
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        ResponseHandler.unauthorized(res, 'Authorization header missing or malformed');
-      return 
+const token = getTokenFromRequest(req);
+
+    if (!token) {
+      ResponseHandler.unauthorized(res, 'Access token missing');
+      return;
     }
-
-    const token = authHeader.split(' ')[1];
 
     const decoded = jwt.verify(token, config.jwtSecret) as DecodedToken;
 

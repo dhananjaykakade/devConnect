@@ -6,7 +6,7 @@ import { registerSchema,loginSchema,updateProfileSchema } from './auth.validatio
 import prisma from '../../helper/prisma.helper';
 import {  verifyRefreshToken,
   createTokens,} from './auth.utils';
-  import {AuthenticatedRequest } from '../../middlewares/auth.middleware';
+  import {AuthenticatedRequest,getRefreshTokenFromRequest } from '../../middlewares/auth.middleware';
   import { redis } from '../../utils/redis';
 
 /**
@@ -106,7 +106,10 @@ const { accessToken, refreshToken } = await createTokens({
 
 
 export const refreshToken:RequestHandler = async (req: Request, res: Response) => {
-  const { refreshToken } = req.body           // or pull from cookie
+  // Get refresh token from request
+  const refreshToken = getRefreshTokenFromRequest(req)
+  console.log('Refresh token:', refreshToken)
+
 
   if (!refreshToken) {
       ResponseHandler.badRequest(res, 'Refresh token missing')
@@ -127,6 +130,7 @@ export const refreshToken:RequestHandler = async (req: Request, res: Response) =
 
     // rotate: delete old, create new
     await prisma.refreshToken.delete({ where: { id: stored.id } })
+
     const { accessToken, refreshToken: newRefresh } = await createTokens({
       id: payload.id,
       role: payload.role,
@@ -325,6 +329,11 @@ export const logout: RequestHandler = async (req: AuthenticatedRequest, res: Res
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'strict',
   });
+  res.clearCookie('accessToken', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+  });                  
     
         ResponseHandler.success(res, 200, 'Logged out successfully');
         return;

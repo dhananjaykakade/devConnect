@@ -17,25 +17,35 @@ import notificationRoute from './module/notification/notification.route'
 const app: Express = express()
 
 // 🔐 Security and performance
+app.use(cookieParser())
+app.use(express.json({ limit: '10mb' }))
+app.use(express.urlencoded({ extended: true }))
+
 app.use(helmet())
 app.use(cors({
-
+  origin: ['http://localhost:5173', 'https://yourdomain.com'],
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-  exposedHeaders: ['Content-Length', 'X-Total-Count'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: [
+    'Content-Type', 
+    'Authorization', 
+    'X-Requested-With',
+    'X-CSRF-Token',
+    'Accept'
+  ],
+  exposedHeaders: [
+    'set-cookie',
+    'Access-Control-Allow-Credentials'
+  ],
   preflightContinue: false,
   optionsSuccessStatus: 204,
-  maxAge: 86400, // 24 hours
-  // You can also specify allowed origins if needed
-  origin: ['http://localhost:5173', 'https://yourdomain.com'],
-}))
+  maxAge: 86400,
+}));
 app.use(compression())
 
 // 🍪 Cookie & JSON parsing
-app.use(express.json({ limit: '10mb' }))
-app.use(express.urlencoded({ extended: true }))
-app.use(cookieParser())
+
+
 
 // 📝 Logging
 app.use(morgan('dev'))

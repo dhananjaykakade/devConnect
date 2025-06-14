@@ -155,24 +155,22 @@ class ResponseHandler {
     refreshToken: string,
     statusCode = 200,
     message = messages.success.LOGGED_IN
-  ) { 
-    res.cookie('accessToken', accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 24 * 60 * 60 * 1000, // 1 day
-    })
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-    })
-    return res.status(statusCode).json({
-      success: true,
-      statusCode,
-      message,
-      data: { user },
-    })
-  }
+  ) {
+  // Set cookies first
+  res.cookie('accessToken', accessToken, { /* cookie options */ });
+  res.cookie('refreshToken', refreshToken, { /* cookie options */ });
+  
+  return res.status(statusCode).json({
+    success: true,
+    statusCode,
+    message,
+    data: { 
+      user
+      
+       
+    }
+  });
+}
 }
 
 export default ResponseHandler
