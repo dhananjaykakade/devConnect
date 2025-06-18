@@ -6,12 +6,17 @@ import Register from "@/pages/register";
 import Profile from "@/pages/profile";
 import { ProtectedRoute } from "@/features/auth/components/ProtectedRoute";
 import TestCookies from "@/pages/TestCookies";
+import OtherUserProfile from "@/pages/OtherUserProfile";
 
 export const router = createBrowserRouter([
   {
     path: "/",
     element: <Home />,
   },
+  {
+  path: '/profile/:userId',
+  element: <OtherUserProfile />,
+},
   {
     path: "/test",
     element: <TestCookies />, // Test endpoint for cookies

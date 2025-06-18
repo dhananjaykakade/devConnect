@@ -52,6 +52,7 @@ api.interceptors.response.use(
         const res = await refreshSession(); // should return new session or user
 
         if (res?.data?.user) {
+          console.log("Session refreshed successfully", res.data.user);
           useAuthStore.getState().login(res.data.user, false);
           processQueue(null, res.data.user);
           return api(originalRequest);

@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { register,refreshToken,login,getProfile ,updateProfile,logout} from './auth.controller'
+import { register,refreshToken,login,getProfile ,updateProfile,logout,getUserById} from './auth.controller'
 import {authenticate } from '../../middlewares/auth.middleware'
 import { rateLimiter } from '../../middlewares/rateLimiter.middleware';
 
@@ -9,7 +9,8 @@ router.post('/register',rateLimiter, register)
 router.get('/refresh', refreshToken)
 router.post('/login',rateLimiter, login)
 router.get('/profile', authenticate, getProfile)
-router.put('/profile', authenticate , updateProfile)
+router.get('/user/:id', authenticate, getUserById) // Get user by ID
+router.patch('/profile', authenticate , updateProfile)
 router.post('/logout',authenticate, logout);
 router.get('/test-cookies', (req, res) => {
   res.cookie('test_cookie', 'value', {

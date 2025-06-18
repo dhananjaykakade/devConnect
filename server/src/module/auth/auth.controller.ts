@@ -213,28 +213,46 @@ export const login:RequestHandler = async (req: Request, res: Response) => {
   }
 }
 
-export const updateProfile:RequestHandler = async (req: AuthenticatedRequest, res: Response) => {
+export const updateProfile: RequestHandler = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const userId = req.user?.id // 👈 from JWT middleware
-
-    const parsed = updateProfileSchema.safeParse(req.body)
-    if (!parsed.success) {
-        ResponseHandler.validationError(res, 'Invalid input', parsed.error.format())
+    const userId = req.user?.id;
+    if (!userId) {
+      ResponseHandler.unauthorized(res, 'User not authenticated');
       return 
     }
 
-    const { username, bio, avatar,techStack,name } = parsed.data
+    const parsed = updateProfileSchema.safeParse(req.body);
+    if (!parsed.success) {
+      ResponseHandler.validationError(res, 'Invalid input', parsed.error.format());
+      return
+    }
 
-// Check if username already exists
-    const existingUser = await prisma.user.findFirst({
-      where: {
-        id: { not: userId }, // Exclude current user
-        username,
-      },
-    })
-    if (existingUser) {
-        ResponseHandler.conflict(res, 'Username already taken')
+    const { username, bio, avatar, techStack, name } = parsed.data;
+
+    // Fetch current user to compare username
+    const currentUser = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { username: true },
+    });
+
+    if (!currentUser) {
+      ResponseHandler.notFound(res, 'User not found');
       return 
+    }
+
+    // If username is changed, check if it's already taken
+    if (username !== currentUser.username) {
+      const existingUser = await prisma.user.findFirst({
+        where: {
+          id: { not: userId },
+          username,
+        },
+      });
+
+      if (existingUser) {
+        ResponseHandler.conflict(res, 'Username already taken');
+        return 
+      }
     }
 
     const updatedUser = await prisma.user.update({
@@ -255,17 +273,20 @@ export const updateProfile:RequestHandler = async (req: AuthenticatedRequest, re
         avatar: true,
         techStack: true,
       },
-    })
-        const cacheKey = `user:profile:${userId}`;
+    });
+
+    // Invalidate cache
+    const cacheKey = `user:profile:${userId}`;
     await redis.del(cacheKey);
 
-    ResponseHandler.success(res, 200, 'Profile updated successfully', updatedUser)
+    ResponseHandler.success(res, 200, 'Profile updated successfully', updatedUser);
     return 
   } catch (error) {
-      ResponseHandler.handleError(error, res)
+    ResponseHandler.handleError(error, res);
     return 
   }
-}
+};
+
 
 //create get profile endpoint
 export const getProfile: RequestHandler = async (req: AuthenticatedRequest, res: Response) => {
@@ -289,6 +310,7 @@ export const getProfile: RequestHandler = async (req: AuthenticatedRequest, res:
         select: {
             id: true,
             username: true,
+            name: true,
             email: true,
             bio: true,
             avatar: true,
@@ -344,3 +366,38 @@ export const logout: RequestHandler = async (req: AuthenticatedRequest, res: Res
     }
 
 
+//get user by id endpoint
+export const getUserById: RequestHandler = async (req: Request, res: Response) => {
+  try {
+    const userId = req.params.id;
+
+    if (!userId) {
+      ResponseHandler.badRequest(res, 'User ID is required');
+      return;
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        username: true,
+        name: true,
+        email: true,
+        bio: true,
+        avatar: true,
+        techStack: true,
+      },
+    });
+
+    if (!user) {
+      ResponseHandler.notFound(res, 'User not found');
+      return;
+    }
+
+    ResponseHandler.success(res, 200, 'User retrieved successfully', user);
+    return;
+  } catch (error) {
+    ResponseHandler.handleError(error, res);
+    return;
+  }
+}

@@ -60,7 +60,7 @@ app.get('/api/health', (req: Request, res: Response) => {
   });
 });
 
-app.use('/api/auth',rateLimit({ windowMs: 15 * 60 * 1000, max: 10 }), authRoutes)
+app.use('/api/auth',rateLimit({ windowMs: 15 * 60 * 1000, max: 10000 }), authRoutes)
 app.use('/api/posts', postRoutes)
 app.use('/api/users', userRoutes)
 app.use('/api/notifications', notificationRoute)
